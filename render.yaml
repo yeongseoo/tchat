@@ -1,0 +1,7 @@
+# Render blueprint: free web service built from the Dockerfile.
+services:
+  - type: web
+    name: tchat
+    runtime: docker
+    plan: free
+    healthCheckPath: /

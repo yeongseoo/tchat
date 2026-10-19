@@ -12,13 +12,13 @@
 
 **macOS / Linux** (터미널)
 ```sh
-curl -fsSL https://raw.githubusercontent.com/OWNER/tchat/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.sh | sh
 tchat
 ```
 
 **Windows** (PowerShell)
 ```powershell
-irm https://raw.githubusercontent.com/OWNER/tchat/main/scripts/install.ps1 | iex
+irm https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.ps1 | iex
 tchat
 ```
 

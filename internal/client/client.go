@@ -113,8 +113,14 @@ func colorFor(nick string) lipgloss.Style {
 // Run connects to the server and starts the UI.
 func Run(url string) error {
 	fmt.Printf("%s 에 연결하는 중...\n", url)
-	dialer := websocket.Dialer{Proxy: http.ProxyFromEnvironment, HandshakeTimeout: 10 * time.Second}
+	// Free hosting plans put the server to sleep when idle; waking it can
+	// take up to a minute, so wait patiently and tell the user why.
+	slow := time.AfterFunc(5*time.Second, func() {
+		fmt.Println("서버가 잠들어 있으면 깨어나는 데 최대 1분 정도 걸립니다. 잠시만 기다려주세요...")
+	})
+	dialer := websocket.Dialer{Proxy: http.ProxyFromEnvironment, HandshakeTimeout: 90 * time.Second}
 	ws, _, err := dialer.Dial(url, nil)
+	slow.Stop()
 	if err != nil {
 		return fmt.Errorf("서버에 연결하지 못했습니다 (%s): %w", url, err)
 	}

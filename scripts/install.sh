@@ -1,7 +1,7 @@
 #!/bin/sh
-# macOS / Linux installer:  curl -fsSL https://raw.githubusercontent.com/OWNER/tchat/main/scripts/install.sh | sh
+# macOS / Linux installer:  curl -fsSL https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.sh | sh
 set -e
-REPO="OWNER/tchat"
+REPO="yeongseoo/tchat"
 case "$(uname -s)" in Darwin) os=darwin ;; Linux) os=linux ;; *) echo "지원하지 않는 OS입니다"; exit 1 ;; esac
 case "$(uname -m)" in x86_64|amd64) arch=amd64 ;; arm64|aarch64) arch=arm64 ;; *) echo "지원하지 않는 CPU입니다"; exit 1 ;; esac
 url="https://github.com/$REPO/releases/latest/download/tchat_${os}_${arch}.tar.gz"
