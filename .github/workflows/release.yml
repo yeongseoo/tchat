@@ -1,8 +1,11 @@
-# Push a tag like v0.1.0 to build Windows/macOS/Linux binaries and publish a GitHub Release.
+# Bump the number in VERSION and push to main: this builds Windows/macOS/Linux
+# binaries and publishes them as a GitHub Release tagged v<VERSION>.
 name: release
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths: [VERSION]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -11,10 +14,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      - name: Create tag from VERSION
+        id: tag
+        run: |
+          tag="v$(tr -d '[:space:]' < VERSION)"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag already released"; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          git tag "$tag" && git push origin "$tag"
       - uses: actions/setup-go@v5
+        if: steps.tag.outputs.skip != 'true'
         with: { go-version: "1.24" }
       - run: go test ./...
+        if: steps.tag.outputs.skip != 'true'
       - uses: goreleaser/goreleaser-action@v6
+        if: steps.tag.outputs.skip != 'true'
         with:
           version: "~> v2"
           args: release --clean

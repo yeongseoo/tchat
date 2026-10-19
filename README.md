@@ -58,10 +58,7 @@ Fly.io, Railway, Render 같은 호스팅 서비스에 이 저장소를 연결하
 1. 설치 스크립트는 `yeongseoo/tchat` 저장소의 최신 Release에서 파일을 받습니다.
 2. 기본 서버 주소는 `main.go`의 `defaultServer`입니다 (현재 `wss://tchat-qseu.onrender.com/ws`).
    사용자는 주소 없이 `tchat`만 입력하면 이 서버로 접속합니다.
-3. 태그를 push하면 GitHub Actions가 윈도우·맥·리눅스용 실행파일을 빌드해서 Release에 올립니다.
-   ```sh
-   git tag v0.1.0 && git push origin v0.1.0
-   ```
+3. `VERSION` 파일의 숫자를 올려서(예: `0.1.0` → `0.1.1`) main에 push하면, GitHub Actions가 윈도우·맥·리눅스용 실행파일을 빌드해서 Release에 올립니다.
 
 ## 구조
 ```
