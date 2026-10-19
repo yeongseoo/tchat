@@ -13,7 +13,7 @@ import (
 
 // defaultServer is the address users connect to when they just type `tchat`.
 // Set it at build time:  go build -ldflags "-X main.defaultServer=wss://chat.example.com/ws"
-var defaultServer = "ws://localhost:8080/ws"
+var defaultServer = "wss://tchat-qseu.onrender.com/ws"
 
 var version = "dev"
 

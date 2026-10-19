@@ -20,6 +20,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Set this in Settings > Secrets and variables > Actions > Variables,
-          # e.g. wss://chat.example.com/ws, so users can just run `tchat`.
-          TCHAT_SERVER: ${{ vars.TCHAT_SERVER }}
