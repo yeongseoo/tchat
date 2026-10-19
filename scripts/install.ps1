@@ -15,4 +15,4 @@ if (-not ($userPath -split ";" | Where-Object { $_ -eq $dir })) {
   [Environment]::SetEnvironmentVariable("Path", "$userPath;$dir", "User")
   $env:Path = "$env:Path;$dir"
 }
-Write-Host "설치 완료! 새 터미널 창을 열고 'tchat' 을 입력하세요."
+Write-Host "설치 완료! 이제 'tchat' 을 입력하면 바로 시작됩니다."

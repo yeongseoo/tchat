@@ -13,13 +13,13 @@
 **macOS / Linux** (터미널)
 ```sh
 curl -fsSL https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.sh | sh
-tchat
+tchat        # 설치 후 바로 실행
 ```
 
 **Windows** (PowerShell)
 ```powershell
 irm https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.ps1 | iex
-tchat
+tchat        # 설치 후 바로 실행
 ```
 
 다른 서버에 접속하려면: `tchat chat.example.com`
