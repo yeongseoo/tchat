@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tchat · 터미널 채팅</title>
+<meta name="description" content="명령어 한 줄로 설치하고, tchat 입력하면 바로 채팅. 대화는 어디에도 저장되지 않습니다.">
+<meta property="og:title" content="tchat · 터미널 채팅">
+<meta property="og:description" content="복붙 한 줄로 설치, tchat 입력하면 바로 채팅. 대화는 저장되지 않습니다.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #0c0e13;
+    --panel: #141820;
+    --panel-2: #1b202b;
+    --line: #262c39;
+    --text: #e7e9ef;
+    --muted: #8d95a8;
+    --accent: #9d8cff;
+    --accent-soft: rgba(157, 140, 255, .14);
+    --green: #7ee2a0;
+    --mono: "D2Coding", ui-monospace, "SF Mono", "Cascadia Mono", Consolas, Menlo, monospace;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard Variable", Pretendard, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; }
+  .logo { font-family: var(--mono); font-weight: 700; font-size: 20px; color: var(--text); }
+  .logo span { color: var(--accent); }
+  .nav { display: flex; gap: 18px; font-size: 15px; }
+  .nav a { color: var(--muted); }
+
+  .hero { padding: 48px 0 28px; text-align: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--line);
+    color: var(--muted); font-size: 14px;
+  }
+  .badge[hidden] { display: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(126, 226, 160, .15); }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.2; margin: 20px 0 14px; letter-spacing: -0.02em; }
+  h1 em { font-style: normal; color: var(--accent); font-family: var(--mono); }
+  .lead { color: var(--muted); font-size: clamp(16px, 2.2vw, 19px); margin: 0 auto; max-width: 620px; }
+
+  /* Install card */
+  .install {
+    margin: 36px auto 0; max-width: 760px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; text-align: left;
+  }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .tab {
+    flex: 1; padding: 14px 10px; background: none; border: 0; cursor: pointer;
+    color: var(--muted); font: inherit; font-size: 15px; font-weight: 600;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .panel { padding: 22px 22px 24px; }
+  .panel[hidden] { display: none; }
+  .step { display: grid; grid-template-columns: 30px 1fr; gap: 12px; margin-bottom: 18px; }
+  .step:last-child { margin-bottom: 0; }
+  .num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: grid; place-items: center; font-weight: 700; font-size: 14px;
+  }
+  .step p { margin: 3px 0 10px; }
+  .step small { color: var(--muted); font-size: 14px; }
+  kbd {
+    font-family: var(--mono); font-size: 13px;
+    padding: 2px 7px; border-radius: 6px;
+    background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px;
+  }
+  .cmd {
+    display: flex; align-items: stretch;
+    background: #0a0c10; border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden;
+  }
+  .cmd code {
+    flex: 1; min-width: 0; padding: 13px 14px;
+    font-family: var(--mono); font-size: 14.5px; color: var(--text);
+    white-space: nowrap; overflow-x: auto;
+  }
+  .cmd code::before { content: "> "; color: var(--muted); }
+  .cmd.sh code::before { content: "$ "; }
+  .copy {
+    flex: none; border: 0; border-left: 1px solid var(--line);
+    background: var(--panel-2); color: var(--text);
+    padding: 0 16px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    min-width: 76px;
+  }
+  .copy:hover { background: #232937; }
+  .copy.done { color: var(--green); }
+
+  /* Terminal preview */
+  section { padding: 56px 0 0; }
+  h2 { font-size: clamp(24px, 3.4vw, 30px); margin: 0 0 8px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .term {
+    background: #0a0c10; border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; font-family: var(--mono); font-size: 14px;
+  }
+  .term-bar { display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .term-bar i { width: 11px; height: 11px; border-radius: 50%; background: #3a4150; }
+  .term-bar span { margin-left: 8px; color: var(--muted); font-size: 13px; }
+  .term-head { padding: 12px 16px 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .term-body { display: grid; grid-template-columns: 1fr 190px; min-height: 230px; }
+  .msgs { padding: 4px 16px 14px; }
+  .msgs div { margin: 3px 0; }
+  .side { border-left: 1px solid var(--line); padding: 4px 14px; }
+  .t { color: #5d6577; }
+  .sys { color: var(--muted); font-style: italic; }
+  .acc { color: var(--accent); font-weight: 700; }
+  .n1 { color: #64b5f6; font-weight: 700; }
+  .n2 { color: #f06292; font-weight: 700; }
+  .n3 { color: #81c784; font-weight: 700; }
+  .dim { color: var(--muted); }
+  .term-input { border-top: 1px solid var(--line); padding: 11px 16px; color: var(--muted); }
+  .cursor { display: inline-block; width: 8px; height: 1.1em; background: var(--text); vertical-align: text-bottom; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* Features */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .ico { font-size: 22px; margin-bottom: 10px; display: block; }
+
+  /* Keys */
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 15px; }
+  th { color: var(--muted); font-weight: 600; font-size: 14px; background: var(--panel-2); }
+  tr:last-child td { border-bottom: 0; }
+  td code { font-family: var(--mono); font-size: 14px; color: var(--accent); }
+
+  /* FAQ */
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 0 18px; margin-bottom: 10px; }
+  summary { cursor: pointer; padding: 15px 0; font-weight: 600; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; float: right; color: var(--muted); font-weight: 400; }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 0 0 16px; color: var(--muted); }
+  details .cmd { margin: 0 0 16px; }
+
+  footer { padding: 56px 0 40px; color: var(--muted); font-size: 14px; text-align: center; }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    .term-body { grid-template-columns: 1fr; }
+    .side { display: none; }
+  }
+  @media (max-width: 520px) {
+    .wrap { padding: 0 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .panel { padding: 18px 16px 20px; }
+    .nav a.hide-sm { display: none; }
+    .cmd code { font-size: 13px; }
+    .term { font-size: 12.5px; }
+    th, td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">&gt;_ t<span>chat</span></div>
+    <nav class="nav">
+      <a href="#install" class="hide-sm">설치</a>
+      <a href="#how">사용법</a>
+      <a href="https://github.com/yeongseoo/tchat">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="badge" id="live" hidden><span class="dot"></span><span id="live-text"></span></div>
+    <h1>복붙 한 줄,<br><em>tchat</em> 치면 바로 채팅</h1>
+    <p class="lead">윈도우·맥 터미널에서 방을 만들거나 골라서 들어가 대화하세요.<br>회원가입 없이 별명만 정하면 끝. 대화는 어디에도 저장되지 않습니다.</p>
+
+    <div class="install" id="install">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-win" aria-controls="p-win" aria-selected="true">Windows</button>
+        <button class="tab" role="tab" id="tab-mac" aria-controls="p-mac" aria-selected="false">macOS</button>
+        <button class="tab" role="tab" id="tab-linux" aria-controls="p-linux" aria-selected="false">Linux</button>
+      </div>
+
+      <div class="panel" id="p-win" role="tabpanel" aria-labelledby="tab-win">
+        <div class="step"><div class="num">1</div><div>
+          <p><b>PowerShell</b>을 엽니다.</p>
+          <small><kbd>시작</kbd> 버튼을 오른쪽 클릭 → <b>터미널</b> 또는 <b>Windows PowerShell</b> 클릭<br>(또는 <kbd>Win</kbd> 누르고 “powershell” 검색)</small>
+        </div></div>
+        <div class="step"><div class="num">2</div><div>
+          <p>아래 명령을 <b>복사</b>해서 붙여넣고 <kbd>Enter</kbd></p>
+          <div class="cmd"><code>irm https://tchat-qseu.onrender.com/install.ps1 | iex</code><button class="copy">복사</button></div>
+        </div></div>
+        <div class="step"><div class="num">3</div><div>
+          <p>설치가 끝나면 이것만 입력하세요.</p>
+          <div class="cmd"><code>tchat</code><button class="copy">복사</button></div>
+        </div></div>
+      </div>
+
+      <div class="panel" id="p-mac" role="tabpanel" aria-labelledby="tab-mac" hidden>
+        <div class="step"><div class="num">1</div><div>
+          <p><b>터미널</b>을 엽니다.</p>
+          <small><kbd>⌘</kbd> + <kbd>Space</kbd> → “터미널” 검색 → <kbd>Enter</kbd></small>
+        </div></div>
+        <div class="step"><div class="num">2</div><div>
+          <p>아래 명령을 <b>복사</b>해서 붙여넣고 <kbd>Enter</kbd></p>
+          <div class="cmd sh"><code>curl -fsSL https://tchat-qseu.onrender.com/install.sh | sh</code><button class="copy">복사</button></div>
+          <small>맥 비밀번호를 물어보면 입력하세요. 입력해도 화면에 안 보이는 게 정상입니다.</small>
+        </div></div>
+        <div class="step"><div class="num">3</div><div>
+          <p>설치가 끝나면 이것만 입력하세요.</p>
+          <div class="cmd sh"><code>tchat</code><button class="copy">복사</button></div>
+        </div></div>
+      </div>
+
+      <div class="panel" id="p-linux" role="tabpanel" aria-labelledby="tab-linux" hidden>
+        <div class="step"><div class="num">1</div><div>
+          <p>터미널에 아래 명령을 붙여넣고 <kbd>Enter</kbd></p>
+          <div class="cmd sh"><code>curl -fsSL https://tchat-qseu.onrender.com/install.sh | sh</code><button class="copy">복사</button></div>
+        </div></div>
+        <div class="step"><div class="num">2</div><div>
+          <p>설치가 끝나면 이것만 입력하세요.</p>
+          <div class="cmd sh"><code>tchat</code><button class="copy">복사</button></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>이렇게 생겼어요</h2>
+    <p class="sub">별명을 정하고, 방을 고르면 바로 대화가 시작됩니다.</p>
+    <div class="term" aria-label="tchat 채팅 화면 예시">
+      <div class="term-bar"><i></i><i></i><i></i><span>Windows PowerShell — tchat</span></div>
+      <div class="term-head"><span class="acc"># 잡담방</span> <span class="dim">· 3명 · 나:</span> <span class="n1">철수</span> <span class="dim">· Esc 나가기 /help</span></div>
+      <div class="term-body">
+        <div class="msgs">
+          <div><span class="t">21:04</span> <span class="sys">* '잡담방' 방에 들어왔습니다. 대화는 저장되지 않습니다.</span></div>
+          <div><span class="t">21:04</span> <span class="n2">영희</span>: 오 철수 왔다 ㅎㅎ</div>
+          <div><span class="t">21:05</span> <span class="n1">철수</span>: 이거 터미널에서 채팅되네?</div>
+          <div><span class="t">21:05</span> <span class="sys">* 민수님이 들어왔습니다.</span></div>
+          <div><span class="t">21:05</span> <span class="n3">민수</span>: 나도 왔음</div>
+          <div><span class="t">21:06</span> <span class="n2">영희</span>: 나가면 대화 다 사라지는 거 신기하다</div>
+        </div>
+        <div class="side">
+          <div class="acc">접속자 (3)</div>
+          <div class="n3">민수</div>
+          <div class="n2">영희</div>
+          <div><span class="n1">철수</span> <span class="dim">(나)</span></div>
+        </div>
+      </div>
+      <div class="term-input">&gt; <span class="cursor"></span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>기능</h2>
+    <p class="sub">필요한 것만 담았습니다.</p>
+    <div class="grid">
+      <div class="card"><span class="ico">💬</span><h3>방 만들기 · 입장</h3><p>새 방을 만들거나 목록에서 골라 들어가세요. 몇 명 있는지도 보여요.</p></div>
+      <div class="card"><span class="ico">👥</span><h3>접속자 보기</h3><p>누가 들어오고 나갔는지, 지금 방에 누가 있는지 바로 보입니다.</p></div>
+      <div class="card"><span class="ico">🏷️</span><h3>별명</h3><p>가입 없이 별명만 정하면 끝. 대화 중에도 <code>/nick</code>으로 바꿀 수 있어요.</p></div>
+      <div class="card"><span class="ico">🫥</span><h3>저장 안 함</h3><p>서버는 메시지를 전달만 하고 버립니다. 마지막 사람이 나가면 방도 사라져요.</p></div>
+      <div class="card"><span class="ico">💻</span><h3>윈도우 · 맥 · 리눅스</h3><p>모든 터미널에서 똑같이 동작합니다. 따로 깔 프로그램이 없어요.</p></div>
+      <div class="card"><span class="ico">⚡</span><h3>가볍고 빠름</h3><p>실행파일 하나, 10MB도 안 됩니다. 설치도 삭제도 몇 초면 끝납니다.</p></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <h2>사용법</h2>
+    <p class="sub">외울 건 거의 없어요.</p>
+    <table>
+      <thead><tr><th>어디서</th><th>입력</th><th>하는 일</th></tr></thead>
+      <tbody>
+        <tr><td>방 목록</td><td><code>↑ ↓</code> <code>Enter</code></td><td>방 고르고 들어가기</td></tr>
+        <tr><td>방 목록</td><td><code>n</code></td><td>새 방 만들기</td></tr>
+        <tr><td>방 목록</td><td><code>q</code></td><td>종료</td></tr>
+        <tr><td>채팅방</td><td><code>/nick 새별명</code></td><td>별명 바꾸기</td></tr>
+        <tr><td>채팅방</td><td><code>/who</code></td><td>접속자 목록</td></tr>
+        <tr><td>채팅방</td><td><code>Esc</code></td><td>방 나가기</td></tr>
+        <tr><td>채팅방</td><td><code>PgUp</code> <code>PgDn</code></td><td>이전 대화 보기</td></tr>
+        <tr><td>어디서나</td><td><code>Ctrl+C</code></td><td>종료</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>자주 묻는 질문</h2>
+    <p class="sub"></p>
+    <details>
+      <summary>처음 접속할 때 오래 걸려요.</summary>
+      <p>무료 서버라서 한동안 아무도 없으면 잠들어요. 깨어나는 데 30초~1분 정도 걸리니 잠시만 기다려주세요. 한 번 깨어나면 빠릅니다.</p>
+    </details>
+    <details>
+      <summary>대화가 정말 저장되지 않나요?</summary>
+      <p>네. 서버는 메시지를 같은 방 사람들에게 전달만 하고 어디에도 기록하지 않습니다. 데이터베이스도 없어요. 다만 다른 사람이 화면을 캡처하는 것까지 막을 수는 없습니다.</p>
+    </details>
+    <details>
+      <summary>업데이트는 어떻게 하나요?</summary>
+      <p>설치할 때 쓴 명령을 한 번 더 붙여넣으면 최신 버전으로 바뀝니다.</p>
+    </details>
+    <details>
+      <summary>삭제하고 싶어요.</summary>
+      <p>Windows (PowerShell):</p>
+      <div class="cmd"><code>Remove-Item -Recurse -Force "$env:LOCALAPPDATA\tchat"</code><button class="copy">복사</button></div>
+      <p>macOS / Linux:</p>
+      <div class="cmd sh"><code>sudo rm /usr/local/bin/tchat</code><button class="copy">복사</button></div>
+    </details>
+    <details>
+      <summary>안전한가요?</summary>
+      <p>소스 코드가 모두 <a href="https://github.com/yeongseoo/tchat">GitHub</a>에 공개되어 있고, 설치 스크립트도 <a href="/install.ps1">install.ps1</a> · <a href="/install.sh">install.sh</a>에서 직접 열어볼 수 있습니다. 통신은 암호화(wss)되고, 다른 사람 화면을 망가뜨리는 특수문자는 서버에서 걸러집니다.</p>
+    </details>
+  </section>
+
+  <footer>
+    tchat · 오픈소스 · <a href="https://github.com/yeongseoo/tchat">github.com/yeongseoo/tchat</a>
+  </footer>
+</div>
+
+<script>
+  // Tabs: start on the visitor's own OS.
+  const tabs = [...document.querySelectorAll('.tab')];
+  function select(id) {
+    for (const t of tabs) {
+      const on = t.id === id;
+      t.setAttribute('aria-selected', on);
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    }
+  }
+  tabs.forEach(t => t.addEventListener('click', () => select(t.id)));
+  const ua = navigator.userAgent;
+  if (/Mac/i.test(ua) && !/iPhone|iPad/i.test(ua)) select('tab-mac');
+  else if (/Linux/i.test(ua) && !/Android/i.test(ua)) select('tab-linux');
+
+  // Copy buttons.
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const text = btn.previousElementSibling.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+      }
+      btn.textContent = '복사됨!'; btn.classList.add('done');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('done'); }, 1600);
+    });
+  });
+
+  // Live counter.
+  fetch('/status').then(r => r.json()).then(s => {
+    document.getElementById('live-text').textContent =
+      s.online > 0 ? `지금 ${s.online}명 접속 중 · 방 ${s.rooms}개` : '서버 정상 운영 중';
+    document.getElementById('live').hidden = false;
+  }).catch(() => {});
+</script>
+</body>
+</html>

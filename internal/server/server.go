@@ -5,6 +5,7 @@ package server
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"sort"
@@ -70,15 +71,43 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true },
 }
 
-func (s *Server) Handler() http.Handler {
+// Handler serves the chat WebSocket at /ws, live stats at /status, and,
+// when site is non-nil, the landing page and install scripts from it.
+func (s *Server) Handler(site fs.FS) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", s.serveWS)
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		s.mu.Lock()
-		rooms, clients := len(s.rooms), len(s.clients)
+		rooms, online := len(s.rooms), len(s.clients)
 		s.mu.Unlock()
-		fmt.Fprintf(w, "tchat server is running. rooms=%d online=%d\n", rooms, clients)
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-store")
+		fmt.Fprintf(w, `{"rooms":%d,"online":%d}`, rooms, online)
 	})
+	if site != nil {
+		serve := func(name, contentType string) http.HandlerFunc {
+			return func(w http.ResponseWriter, r *http.Request) {
+				data, err := fs.ReadFile(site, name)
+				if err != nil {
+					http.NotFound(w, r)
+					return
+				}
+				w.Header().Set("Content-Type", contentType)
+				w.Header().Set("Cache-Control", "public, max-age=300")
+				w.Write(data)
+			}
+		}
+		mux.HandleFunc("/install.sh", serve("scripts/install.sh", "text/plain; charset=utf-8"))
+		mux.HandleFunc("/install.ps1", serve("scripts/install.ps1", "text/plain; charset=utf-8"))
+		index := serve("web/index.html", "text/html; charset=utf-8")
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/" {
+				http.NotFound(w, r)
+				return
+			}
+			index(w, r)
+		})
+	}
 	return mux
 }
 
@@ -427,8 +456,8 @@ func systemMsg(text string) protocol.Message {
 	return protocol.Message{Type: protocol.System, Text: text, Time: time.Now().Unix()}
 }
 
-func Run(addr string) error {
+func Run(addr string, site fs.FS) error {
 	log.Printf("tchat server listening on %s (WebSocket path /ws)", addr)
-	srv := &http.Server{Addr: addr, Handler: New().Handler(), ReadHeaderTimeout: 10 * time.Second}
+	srv := &http.Server{Addr: addr, Handler: New().Handler(site), ReadHeaderTimeout: 10 * time.Second}
 	return srv.ListenAndServe()
 }

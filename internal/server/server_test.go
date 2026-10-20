@@ -57,7 +57,7 @@ func login(t *testing.T, srv *httptest.Server, nick string) *tc {
 }
 
 func TestChatFlow(t *testing.T) {
-	srv := httptest.NewServer(New().Handler())
+	srv := httptest.NewServer(New().Handler(nil))
 	defer srv.Close()
 
 	a := login(t, srv, "철수")
@@ -109,7 +109,7 @@ func TestChatFlow(t *testing.T) {
 }
 
 func TestRateLimit(t *testing.T) {
-	srv := httptest.NewServer(New().Handler())
+	srv := httptest.NewServer(New().Handler(nil))
 	defer srv.Close()
 	a := login(t, srv, "spam")
 	a.send(protocol.Message{Type: protocol.Create, Room: "r"})

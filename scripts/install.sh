@@ -1,5 +1,5 @@
 #!/bin/sh
-# macOS / Linux installer:  curl -fsSL https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.sh | sh
+# macOS / Linux installer:  curl -fsSL https://tchat-qseu.onrender.com/install.sh | sh
 set -e
 REPO="yeongseoo/tchat"
 case "$(uname -s)" in Darwin) os=darwin ;; Linux) os=linux ;; *) echo "지원하지 않는 OS입니다"; exit 1 ;; esac

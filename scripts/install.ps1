@@ -1,4 +1,4 @@
-# Windows installer (PowerShell):  irm https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.ps1 | iex
+# Windows installer (PowerShell):  irm https://tchat-qseu.onrender.com/install.ps1 | iex
 $ErrorActionPreference = "Stop"
 $repo = "yeongseoo/tchat"
 $arch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "amd64" }

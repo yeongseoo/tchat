@@ -12,13 +12,13 @@
 
 **macOS / Linux** (터미널)
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.sh | sh
+curl -fsSL https://tchat-qseu.onrender.com/install.sh | sh
 tchat        # 설치 후 바로 실행
 ```
 
 **Windows** (PowerShell)
 ```powershell
-irm https://raw.githubusercontent.com/yeongseoo/tchat/main/scripts/install.ps1 | iex
+irm https://tchat-qseu.onrender.com/install.ps1 | iex
 tchat        # 설치 후 바로 실행
 ```
 

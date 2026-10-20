@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"net/url"
@@ -16,6 +17,12 @@ import (
 var defaultServer = "wss://tchat-qseu.onrender.com/ws"
 
 var version = "dev"
+
+// The landing page and install scripts are served by the server itself, so
+// `irm https://<server>/install.ps1 | iex` always matches the deployed page.
+//
+//go:embed web/index.html scripts/install.sh scripts/install.ps1
+var site embed.FS
 
 const usage = `tchat - 터미널 채팅
 
@@ -34,7 +41,7 @@ func main() {
 			fs := flag.NewFlagSet("serve", flag.ExitOnError)
 			addr := fs.String("addr", defaultAddr(), "listen address")
 			fs.Parse(args[1:])
-			if err := server.Run(*addr); err != nil {
+			if err := server.Run(*addr, site); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(1)
 			}
